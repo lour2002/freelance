@@ -632,6 +632,7 @@ class MyForm
 include_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/php_interface/validators/email_validator.php");
 
 AddEventHandler("iblock", "OnAfterIBlockElementUpdate", "saleEmailSend");
+AddEventHandler("iblock", "OnAfterIBlockElementSetPropertyValues", "saleEmailSend");
 function saleEmailSend($arFields){
     
     if($arFields["IBLOCK_ID"]==58 && $arFields["IBLOCK_SECTION"][0]==129){
