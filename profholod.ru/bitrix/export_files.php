@@ -11,7 +11,7 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.ph
 
 $listIP = Array('84.47.183.102', '188.170.15.177');
 
-AddMessage2Log($_SERVER['REMOTE_ADDR']."\n", "export_files");
+AddMessage2Log($_SERVER['REMOTE_ADDR'].PHP_EOL, "export_files");
 
 if('POST' === $_SERVER['REQUEST_METHOD'] && in_array($_SERVER['REMOTE_ADDR'], $listIP))
 {
@@ -43,45 +43,45 @@ if('POST' === $_SERVER['REQUEST_METHOD'] && in_array($_SERVER['REMOTE_ADDR'], $l
 			$result = fwrite($fp, $DATA);
 			if ($result === $DATA_LEN)
 			{
-				AddMessage2Log("success\n", "export_files");
+				AddMessage2Log("success".PHP_EOL, "export_files");
                 if (!CModule::IncludeModule('iblock'))
                 {
-                    AddMessage2Log("Модуль Информационных блоков не установлен.\n","export_files");
+                    AddMessage2Log("Модуль Информационных блоков не установлен.".PHP_EOL,"export_files");
                 }    
                 else 
                 {
-                    AddMessage2Log(substr($ABS_FILE_NAME, 0, strrpos($ABS_FILE_NAME, "/")+1)."\n","export_files");
+                    AddMessage2Log(substr($ABS_FILE_NAME, 0, strrpos($ABS_FILE_NAME, "/")+1).PHP_EOL,"export_files");
                     $result = CIBlockXMLFile::UnZip($ABS_FILE_NAME);
                 }
                 
                 if ($result===false)
                 {
-                    AddMessage2Log("Ошибка распаковки архива.\n","export_files");
+                    AddMessage2Log("Ошибка распаковки архива.".PHP_EOL,"export_files");
                 }
                 elseif ($result===true)
                 {
                     $ABS_FILE_NAME = false;
                     $files_unzip = true;
-                    AddMessage2Log("Распаковка архива завершена.\n","export_files");
+                    AddMessage2Log("Распаковка архива завершена.".PHP_EOL,"export_files");
                 }
                 else
                 {
-                    AddMessage2Log("Идет распаковка архива.\n","export_files");
+                    AddMessage2Log("Идет распаковка архива.".PHP_EOL,"export_files");
                 }
 			}
 			else
 			{
-				AddMessage2Log("Ошибка записи в файл\n", "export_files");
+				AddMessage2Log("Ошибка записи в файл".PHP_EOL, "export_files");
 			}
 		}
 		else
 		{
-			AddMessage2Log("Ошибка открытия файла для записи.\n", "export_files");
+			AddMessage2Log("Ошибка открытия файла для записи.".PHP_EOL, "export_files");
 		}
 	}
 	else
 	{
-		AddMessage2Log("Ошибка чтения HTTP данных.\n", "export_files");
+		AddMessage2Log("Ошибка чтения HTTP данных.".PHP_EOL, "export_files");
     }
 
     if ($files_unzip) 
@@ -119,6 +119,11 @@ if('POST' === $_SERVER['REQUEST_METHOD'] && in_array($_SERVER['REMOTE_ADDR'], $l
                 );
 
                 CIBlockElement::SetPropertyValuesEx($key, IBLOCK_ID, $PROPERTY_VALUES );
+
+                AddMessage2Log("Файл {$file} сохранен в єлемент ", "export_files");
+            } 
+            else {
+                AddMessage2Log("Файл не найден {$file}".PHP_EOL, "export_files");
             }
             
         }
