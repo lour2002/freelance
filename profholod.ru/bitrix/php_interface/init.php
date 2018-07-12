@@ -632,7 +632,7 @@ class MyForm
 include_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/php_interface/validators/email_validator.php");
 
 AddEventHandler("iblock", "OnAfterIBlockElementUpdate", "saleEmailSend");
-AddEventHandler("iblock", "OnAfterIBlockElementSetPropertyValues", "saleEmailSendAfterSetPropertyValues");
+//AddEventHandler("iblock", "OnAfterIBlockElementSetPropertyValues", "saleEmailSendAfterSetPropertyValues");
 function saleEmailSendAfterSetPropertyValues ($ELEMENT_ID, $IBLOCK_ID)
 {
 
