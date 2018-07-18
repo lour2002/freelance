@@ -1,5 +1,8 @@
 <?php
-define("LOG_FILENAME", __DIR__."/log.txt");
+if (!defined("LOG_FILENAME")) {
+    define("LOG_FILENAME", __DIR__."/log.txt");
+}
+
 
 if ( 60*60*24 < time() - filemtime(LOG_FILENAME) ){
     $fp = fopen(LOG_FILENAME,"w+");
