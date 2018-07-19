@@ -102,7 +102,7 @@ if('POST' === $_SERVER['REQUEST_METHOD'] && in_array($_SERVER['REMOTE_ADDR'], $l
         define('PROPERTY_CODE','FILE');
         define('IBLOCK_ID',58);
         define('SECTION_ID',129);
-        foreach ($list_files as $key => $file) 
+        foreach ($list_files as $id => $file) 
         {
 
             if (file_exists($WORK_DIR_NAME.$file))
@@ -121,9 +121,30 @@ if('POST' === $_SERVER['REQUEST_METHOD'] && in_array($_SERVER['REMOTE_ADDR'], $l
                     "FILE" => Array('VALUE' => $TMPFILE, 'DESCRIPTION' => $TMPFILE['name'])
                 );
 
-                CIBlockElement::SetPropertyValuesEx($key, IBLOCK_ID, $PROPERTY_VALUES );
+                CIBlockElement::SetPropertyValuesEx($id, IBLOCK_ID, $PROPERTY_VALUES );
 
                 AddMessage2Log("Файл {$file} сохранен в єлемент ", "export_files");
+
+                // Send mail
+
+                $res = CIBlockElement::GetByID($id)->GetNext();
+                if ($res) {
+                    $arFileds['IBLOCK_ID'] = IBLOCK_ID;
+                    $arFields["IBLOCK_SECTION"][0] = SECTION_ID;
+                    $arFields["ID"] = $id;
+                    $arFields["NAME"] = $res['NAME'];
+                    $arFields["DETAIL_TEXT"] = $res['DETAIL_TEXT'];
+
+                    AddMessage2Log("Входной массив ".print_r($arFileds,TRUE), "send_mail");
+
+                    saleEmailSend($arFileds);
+
+                    AddMessage2Log("Письмо отправленно ".$id, "send_mail");
+
+                } else {
+                    AddMessage2Log("Ошибка получения данных ".$id, "send_mail");
+                }
+                
             } 
             else {
                 AddMessage2Log("Файл не найден {$file}".PHP_EOL, "export_files");
