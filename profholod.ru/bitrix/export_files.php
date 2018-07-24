@@ -129,15 +129,15 @@ if('POST' === $_SERVER['REQUEST_METHOD'] && in_array($_SERVER['REMOTE_ADDR'], $l
 
                 $res = CIBlockElement::GetByID($id)->GetNext();
                 if ($res) {
-                    $arFileds['IBLOCK_ID'] = IBLOCK_ID;
+                    $arFields['IBLOCK_ID'] = IBLOCK_ID;
                     $arFields["IBLOCK_SECTION"][0] = SECTION_ID;
                     $arFields["ID"] = $id;
                     $arFields["NAME"] = $res['NAME'];
                     $arFields["DETAIL_TEXT"] = $res['DETAIL_TEXT'];
 
-                    AddMessage2Log("Входной массив ".print_r($arFileds,TRUE), "send_mail");
+                    AddMessage2Log("Входной массив ".print_r($arFields,TRUE), "send_mail");
 
-                    saleEmailSend($arFileds);
+                    saleEmailSend($arFields);
 
                     AddMessage2Log("Письмо отправленно ".$id, "send_mail");
 
