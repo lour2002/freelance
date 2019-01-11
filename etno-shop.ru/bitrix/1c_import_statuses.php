@@ -1,4 +1,6 @@
 <?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/classes/general/xml.php');
+
 if (!defined("LOG_FILENAME")) {
     define("LOG_FILENAME", __DIR__."/import-log.txt");
 }
@@ -12,6 +14,10 @@ if ( 60*60*24 < time() - filemtime(LOG_FILENAME) ){
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 
 AddMessage2Log($_SERVER['REMOTE_ADDR'].PHP_EOL, "export_files");
+AddMessage2Log(print_r($_SERVER, TRUE).PHP_EOL, "export_files");
+AddMessage2Log(print_r($_GET, TRUE).PHP_EOL, "export_files");
+AddMessage2Log(print_r($_POST, TRUE).PHP_EOL, "export_files");
+
 
 if('POST' === $_SERVER['REQUEST_METHOD']){
     $FILE_NAME = false;
@@ -19,7 +25,7 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
     $WORK_DIR_NAME = false;
     $filename = 'import-statuses-'.md5(time()).'.xml';
 
-    $DIR_NAME = $_SERVER["DOCUMENT_ROOT"] . COption::GetOptionString("main", "upload_dir", "upload") . "/import_statuses/";
+    $DIR_NAME = $_SERVER["DOCUMENT_ROOT"] . '/' . COption::GetOptionString("main", "upload_dir", "upload") . "/import_statuses/";
     $FILE_NAME = rel2abs($DIR_NAME, "/".$filename);
 
     if ((strlen($FILE_NAME) > 1) && ($FILE_NAME === "/".$filename))
@@ -47,7 +53,19 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                 else 
                 {
                     AddMessage2Log(substr($ABS_FILE_NAME, 0, strrpos($ABS_FILE_NAME, "/")+1)."\n","export_files");
-                    //$result = CIBlockXMLFile::UnZip($ABS_FILE_NAME);
+                    
+                    $xml = new CDataXML();
+
+                    if ($xml) {
+                        $xml_string = file_get_contents($ABS_FILE_NAME);
+                        if ($xml_string) {
+                            $xml->LoadString($xml_string);
+                        } else {
+                            AddMessage2Log("Ошибка чтения файла xml .\n","export_files");    
+                        }
+                    } else {
+                        AddMessage2Log("Ошибка создания объекта xml .\n","export_files");
+                    }
                 }
                 
                 if ($result===false)
