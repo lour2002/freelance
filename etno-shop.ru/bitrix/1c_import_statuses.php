@@ -5,6 +5,8 @@ if (!defined("LOG_FILENAME")) {
     define("LOG_FILENAME", __DIR__."/import-log.txt");
 }
 
+define("CATALOG_IBLOCK_ID", 4)
+
 if ( 60*60*24 < time() - filemtime(LOG_FILENAME) ){
     $fp = fopen(LOG_FILENAME,"w+");
     ftruncate($fp,0);
@@ -15,9 +17,6 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.ph
 
 AddMessage2Log($_SERVER['REMOTE_ADDR'].PHP_EOL, "export_files");
 AddMessage2Log(print_r($_SERVER, TRUE).PHP_EOL, "export_files");
-AddMessage2Log(print_r($_GET, TRUE).PHP_EOL, "export_files");
-AddMessage2Log(print_r($_POST, TRUE).PHP_EOL, "export_files");
-
 
 if('POST' === $_SERVER['REQUEST_METHOD']){
     $FILE_NAME = false;
@@ -53,13 +52,52 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                 else 
                 {
                     AddMessage2Log(substr($ABS_FILE_NAME, 0, strrpos($ABS_FILE_NAME, "/")+1)."\n","export_files");
-                    
+
                     $xml = new CDataXML();
 
                     if ($xml) {
-                        $xml_string = file_get_contents($ABS_FILE_NAME);
-                        if ($xml_string) {
+                        $base64_encode = file_get_contents($ABS_FILE_NAME);
+                        $xml_string = $result = base64_decode($base64_encode);
+                        if ($base64_encode && $xml_string) {
                             $xml->LoadString($xml_string);
+
+                            if ($node = $xml->SelectNodes('/Товары')) {
+                                $data = [];
+                                foreach ($node->children() as $index => $childNode) {
+                                    $arrayChild = $childNode->__toArray();
+                                    // Артикул
+                                    // Состояние
+                                    $articule = $arrayChild['#']['Артикул'][0]['#'];
+                                    $statuses = $arrayChild['#']['Состояние'][0]['#'];
+                                    $data[$articule] = $statuses;
+
+                                    $articules = array_keys($data);
+
+                                    $arOreder = [];
+                                    $arFilter = [
+                                        "IBLOCK_ID" => CATALOG_IBLOCK_ID,
+                                        "PROPERTY_ARTICLE" => $articules,
+                                    ];
+                                    $arSelect = ["PROPERTY_ARTICLE"];
+
+                                    $result = CIBlockLement::GetList($arOreder, $arFilter, false, [], $arSelect);
+                                    $ids = [];
+                                    while($ob = $result->GetNextElement()) {
+                                        $arFields = $ob->GetFields();  
+                                        $ids[] = $ID = $arFields['ID'];
+                                        $arProps = $ob->GetProperties();
+                                        CIBlockElement::SetPropertyValuesEx($ID, CATALOG_IBLOCK_ID, [
+                                            "PROPERTY_DELIVERY_TYPE_TEST" => $data[$arProps['PROPERTY_ARTICLE']];
+                                        ])
+                                    }
+
+                                    AddMessage2Log(implode('|', $ids)."\n","update goods");        
+                                }
+
+                            } else {
+                                AddMessage2Log("Не удалось получить список товаров .\n","export_files");        
+                            }
+                            
                         } else {
                             AddMessage2Log("Ошибка чтения файла xml .\n","export_files");    
                         }
@@ -70,7 +108,7 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                 
                 if ($result===false)
                 {
-                    AddMessage2Log("Ошибка парсинга XML.\n","export_files");
+                    AddMessage2Log("Ошибка парсинга чтения base64.\n","export_files");
                 }
                 elseif ($result===true)
                 {
