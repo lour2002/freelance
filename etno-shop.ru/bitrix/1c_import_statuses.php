@@ -5,7 +5,7 @@ if (!defined("LOG_FILENAME")) {
     define("LOG_FILENAME", __DIR__."/import-log.txt");
 }
 
-define("CATALOG_IBLOCK_ID", 4)
+define("CATALOG_IBLOCK_ID", 4);
 
 if ( 60*60*24 < time() - filemtime(LOG_FILENAME) ){
     $fp = fopen(LOG_FILENAME,"w+");
@@ -87,8 +87,8 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                                         $ids[] = $ID = $arFields['ID'];
                                         $arProps = $ob->GetProperties();
                                         CIBlockElement::SetPropertyValuesEx($ID, CATALOG_IBLOCK_ID, [
-                                            "PROPERTY_DELIVERY_TYPE_TEST" => $data[$arProps['PROPERTY_ARTICLE']];
-                                        ])
+                                            "PROPERTY_DELIVERY_TYPE_TEST" => $data[$arProps['PROPERTY_ARTICLE']]
+                                        ]);
                                     }
 
                                     AddMessage2Log(implode('|', $ids)."\n","update goods");        
