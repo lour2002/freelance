@@ -1,4 +1,6 @@
 <?php
+set_time_limit(3600);
+
 require_once($_SERVER['DOCUMENT_ROOT'] . '/bitrix/modules/main/classes/general/xml.php');
 
 if (!defined("LOG_FILENAME")) {
@@ -80,7 +82,7 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                                     ];
                                     $arSelect = ["PROPERTY_ARTICLE"];
 
-                                    $result = CIBlockLement::GetList($arOreder, $arFilter, false, [], $arSelect);
+                                    $result = CIBlockElement::GetList($arOreder, $arFilter, false, [], $arSelect);
                                     $ids = [];
                                     while($ob = $result->GetNextElement()) {
                                         $arFields = $ob->GetFields();  
