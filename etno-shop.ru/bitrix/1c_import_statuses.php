@@ -72,28 +72,35 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                                     $articule = $arrayChild['#']['Артикул'][0]['#'];
                                     $statuses = $arrayChild['#']['Состояние'][0]['#'];
                                     $data[$articule] = $statuses;
+                                }
 
-                                    $articules = array_keys($data);
+                                $articules = array_keys($data);
 
-                                    $arOreder = [];
-                                    $arFilter = [
-                                        "IBLOCK_ID" => CATALOG_IBLOCK_ID,
-                                        "PROPERTY_ARTICLE" => $articules,
-                                    ];
-                                    $arSelect = ["PROPERTY_ARTICLE"];
+                                $arOreder = [];
+                                $arFilter = [
+                                    "IBLOCK_ID" => CATALOG_IBLOCK_ID,
+                                    "PROPERTY_ARTICLE" => $articules,
+                                ];
+                                $arSelect = ["ID", "PROPERTY_ARTICLE", 'PROPERTY_DELIVERY_TYPE'];
 
-                                    $result = CIBlockElement::GetList($arOreder, $arFilter, false, [], $arSelect);
-                                    $ids = [];
-                                    while($ob = $result->GetNextElement()) {
-                                        $arFields = $ob->GetFields();  
-                                        $ids[] = $ID = $arFields['ID'];
-                                        $arProps = $ob->GetProperties();
+                                $res = CIBlockElement::GetList($arOreder, $arFilter, false, [], $arSelect);
+
+                                AddMessage2Log(implode('|', $articules)."\n","update goods");
+
+                                while($ob = $res->GetNextElement()) {
+                                    $arFields = $ob->GetFields();
+
+                                    $ID = $arFields['ID'];
+
+                                    AddMessage2Log(print_r($arFields, TRUE)."\n","good-fields");
+                                    AddMessage2Log(print_r([$data[$arFields['PROPERTY_ARTICLE_VALUE']],$arFields['PROPERTY_DELIVERY_TYPE_ENUM_ID']], TRUE)."\n","good-fields");
+
+                                    if ($arFields["PROPERTY_DELIVERY_TYPE_ENUM_ID"] != $data[$arFields['PROPERTY_ARTICLE_VALUE']]) {
                                         CIBlockElement::SetPropertyValuesEx($ID, CATALOG_IBLOCK_ID, [
-                                            "PROPERTY_DELIVERY_TYPE_TEST" => $data[$arProps['PROPERTY_ARTICLE']]
+                                            "DELIVERY_TYPE" => ((int)$data[$arFields['PROPERTY_ARTICLE_VALUE']]) ? $data[$arFields['PROPERTY_ARTICLE_VALUE']] : 4
                                         ]);
                                     }
 
-                                    AddMessage2Log(implode('|', $ids)."\n","update goods");        
                                 }
 
                             } else {
@@ -120,7 +127,7 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                 }
                 else
                 {
-                    AddMessage2Log("Идет распаковка архива.\n","export_files");
+                    AddMessage2Log("Неопределенный результат.\n","export_files");
                 }
 			}
 			else
