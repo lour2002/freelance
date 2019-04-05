@@ -70,8 +70,9 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
                                     // Артикул
                                     // Состояние
                                     $articule = $arrayChild['#']['Артикул'][0]['#'];
-                                    $statuses = $arrayChild['#']['Состояние'][0]['#'];
-                                    $data[$articule] = $statuses;
+                                    $status = $arrayChild['#']['Состояние'][0]['#'];
+                                    $price = $arrayChild['#']['Цена'][0]['#'];
+                                    $data[$articule] = ['status' => $status, 'price' => $price];
                                 }
 
                                 $articules = array_keys($data);
@@ -92,12 +93,22 @@ if('POST' === $_SERVER['REQUEST_METHOD']){
 
                                     $ID = $arFields['ID'];
 
-                                    AddMessage2Log(print_r($arFields, TRUE)."\n","good-fields");
-                                    AddMessage2Log(print_r([$data[$arFields['PROPERTY_ARTICLE_VALUE']],$arFields['PROPERTY_DELIVERY_TYPE_ENUM_ID']], TRUE)."\n","good-fields");
+                                    $status = $data[$arFields['PROPERTY_ARTICLE_VALUE']]['status'];
+                                    $price = $data[$arFields['PROPERTY_ARTICLE_VALUE']]['price'];
 
-                                    if ($arFields["PROPERTY_DELIVERY_TYPE_ENUM_ID"] != $data[$arFields['PROPERTY_ARTICLE_VALUE']]) {
+                                    AddMessage2Log(print_r($arFields, TRUE)."\n","good-fields");
+                                    AddMessage2Log(print_r([$status,$arFields['PROPERTY_DELIVERY_TYPE_ENUM_ID']], TRUE)."\n","good-fields");
+                                    AddMessage2Log(print_r($price, TRUE)."\n","good-fields");
+
+                                    CIBlockElement::SetPropertyValuesEx($ID, CATALOG_IBLOCK_ID, [
+                                        "PRICE_TEST" => (int)$price
+                                    ]);
+
+                                    if ($arFields["PROPERTY_DELIVERY_TYPE_ENUM_ID"] != $status &&
+										in_array($status, [1,2,3,4])
+									) {
                                         CIBlockElement::SetPropertyValuesEx($ID, CATALOG_IBLOCK_ID, [
-                                            "DELIVERY_TYPE" => ((int)$data[$arFields['PROPERTY_ARTICLE_VALUE']]) ? $data[$arFields['PROPERTY_ARTICLE_VALUE']] : 4
+                                            "DELIVERY_TYPE" => (int)$status
                                         ]);
                                     }
 
